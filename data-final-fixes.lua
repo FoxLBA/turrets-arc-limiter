@@ -21,8 +21,8 @@ for _, type in pairs({"ammo-turret", "electric-turret"}) do
         table.insert(turret.flags, "building-direction-8-way")
       end
       turret.turret_base_has_direction = true
+      turret.localised_description = {"", {"?", turret.localised_description or {"entity-description." .. t_name}, ""}, {"other.additional-turret-description"}}
       local new_turret = table.deepcopy(turret)
-      new_turret.localised_description = {"entity-description." .. t_name}
       new_turret.placeable_by = {item = t_name, count = 1}
       new_turret.localised_name = {"", {"entity-name." .. t_name}, " (1/3)"}
       new_turret.name = t_name .. "-tr1/3"
