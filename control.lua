@@ -23,6 +23,23 @@ local function find_controled_turret()
   global.turret_defauld_index = turret_defauld_index
 end
 
+local function on_configuration_changed(event)
+  find_controled_turret()
+  local turrets = {}
+  for _, t_name in pairs(global.turret_defauld_index) do
+    if not turrets[t_name] then turrets[t_name] = true end
+  end
+  for _, force in pairs(game.forces) do
+    for t_name, _ in pairs(turrets) do
+      local bonus = force.get_turret_attack_modifier(t_name)
+      if bonus > 0 then
+          force.set_turret_attack_modifier(t_name .. "-tr1/3", bonus)
+          force.set_turret_attack_modifier(t_name .. "-tr1/7", bonus)
+      end
+    end
+  end
+end
+
 local function change_turret_turn_range(entity, change_type, player)
   local new_name
   if change_type == "next" then
@@ -60,7 +77,7 @@ local function change_turret_turn_range(entity, change_type, player)
 end
 
 script.on_init(find_controled_turret)
-script.on_configuration_changed(find_controled_turret)
+script.on_configuration_changed(on_configuration_changed)
 
 script.on_event("change-turret-turn-range", function(e)
   local player = game.get_player(e.player_index)
