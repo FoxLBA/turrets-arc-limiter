@@ -1,15 +1,15 @@
 local function find_controled_turret()
   local turret_inddex = {}
   local turret_defauld_index = {}
-  for _, turret in pairs(game.get_filtered_entity_prototypes{
+  for _, turret in pairs(prototypes.get_entity_filtered{
       {filter = "type", type = {"ammo-turret", "electric-turret"}}
     }) do
     if (turret.attack_parameters.turn_range == 1)
     or (not turret.attack_parameters.turn_range)
     then
       local t_name = turret.name
-      local t2 = game.entity_prototypes[t_name .. "-tr1/3"]
-      local t3 = game.entity_prototypes[t_name .. "-tr1/7"]
+      local t2 = prototypes.entity[t_name .. "-tr1d3"]
+      local t3 = prototypes.entity[t_name .. "-tr1d7"]
       if t2 and t3 then
         turret_inddex[t_name] = t2.name
         turret_inddex[t2.name] = t3.name
@@ -19,35 +19,28 @@ local function find_controled_turret()
       end
     end
   end
-  global.turret_inddex = turret_inddex
-  global.turret_defauld_index = turret_defauld_index
+  storage.turret_inddex = turret_inddex
+  storage.turret_defauld_index = turret_defauld_index
 end
 
 local function on_configuration_changed(event)
   find_controled_turret()
   local turrets = {}
-  for _, t_name in pairs(global.turret_defauld_index) do
+  for _, t_name in pairs(storage.turret_defauld_index) do
     if not turrets[t_name] then turrets[t_name] = true end
   end
   for _, force in pairs(game.forces) do
     for t_name, _ in pairs(turrets) do
       local bonus = force.get_turret_attack_modifier(t_name)
       if bonus > 0 then
-          force.set_turret_attack_modifier(t_name .. "-tr1/3", bonus)
-          force.set_turret_attack_modifier(t_name .. "-tr1/7", bonus)
+          force.set_turret_attack_modifier(t_name .. "-tr1d3", bonus)
+          force.set_turret_attack_modifier(t_name .. "-tr1d7", bonus)
       end
     end
   end
 end
 
-local function change_turret_turn_range(entity, change_type, player)
-  local new_name
-  if change_type == "next" then
-    new_name =  global.turret_inddex[entity.name]
-  else
-    new_name =  global.turret_defauld_index[entity.name]
-  end
-  if not new_name then return end
+local function replace_turret(entity, new_name, new_direction)
   local dd = entity.damage_dealt
   local k = entity.kills
   local last = entity.last_user
@@ -58,7 +51,7 @@ local function change_turret_turn_range(entity, change_type, player)
     name = new_name,
     position = entity.position,
     force = entity.force,
-    direction = entity.direction,
+    direction = new_direction or entity.direction,
     fast_replace = true,
     raise_built = true,
     spill = false,
@@ -70,6 +63,20 @@ local function change_turret_turn_range(entity, change_type, player)
     new_entity.last_user = last
     new_entity.health = health
     if energy then new_entity.energy = energy end
+  end
+  return new_entity
+end
+
+local function change_turret_turn_range(entity, change_type, player)
+  local new_name
+  if change_type == "next" then
+    new_name =  storage.turret_inddex[entity.name]
+  else
+    new_name =  storage.turret_defauld_index[entity.name]
+  end
+  if not new_name then return end
+  local new_entity = replace_turret(entity, new_name)
+  if new_entity then
     if player then
       player.play_sound{path = "utility/wire_connect_pole"}
     end
@@ -80,12 +87,33 @@ script.on_init(find_controled_turret)
 script.on_configuration_changed(on_configuration_changed)
 
 script.on_event("change-turret-turn-range", function(e)
+---@diagnostic disable-next-line: undefined-field
   local player = game.get_player(e.player_index)
   if not player then return end
   local selected = player.selected
-  if selected and selected.valid and global.turret_inddex[selected.name] then
+  if selected and selected.valid and storage.turret_inddex[selected.name] then
     change_turret_turn_range(selected, "next", player)
   end
+end)
+
+local function rotate_turret(event, reverse)
+  local player = game.players[event.player_index]
+  if not player then return end
+  local selected = player.selected
+  if selected and selected.valid and storage.turret_defauld_index[selected.name] then
+    local d = 2
+    if reverse then d = 14 end
+    d = (selected.direction + d) % 16
+    replace_turret(selected, selected.name, d)
+  end
+end
+
+script.on_event("change-turret-rotate", function(e)
+  rotate_turret(e, false)
+end)
+
+script.on_event("change-turret-reverse-rotate", function(e)
+  rotate_turret(e, true)
 end)
 
 commands.add_command("reset_turrets_turn_range", {"command-help.reset-turrets-turn-range"}, function(e)
@@ -96,7 +124,7 @@ commands.add_command("reset_turrets_turn_range", {"command-help.reset-turrets-tu
   end
 
   local turret_list = {}
-  for name, _ in pairs(global.turret_defauld_index) do
+  for name, _ in pairs(storage.turret_defauld_index) do
     table.insert(turret_list, name)
   end
 

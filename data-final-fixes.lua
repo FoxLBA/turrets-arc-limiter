@@ -22,17 +22,20 @@ for _, type in pairs({"ammo-turret", "electric-turret"}) do
       turret.fast_replaceable_group = fr_group
       if not is_have_8_way_flag(turret.flags) then
         table.insert(turret.flags, "building-direction-8-way")
+        local connector = turret.circuit_connector[1]
+        for i = 1, 7 do table.insert(turret.circuit_connector, connector) end
       end
       turret.turret_base_has_direction = true
+      --turret.allow_turning_when_starting_attack = true
       turret.localised_description = {"", {"?", turret.localised_description or {"entity-description." .. t_name}, ""}, {"other.additional-turret-description"}}
       local new_turret = table.deepcopy(turret)
       new_turret.placeable_by = {item = t_name, count = 1}
       new_turret.localised_name = {"", {"entity-name." .. t_name}, " (1/3)"}
-      new_turret.name = t_name .. "-tr1/3"
+      new_turret.name = t_name .. "-tr1d3"
       new_turret.attack_parameters.turn_range = 1/3
       table.insert(new_turrets, table.deepcopy(new_turret))
       new_turret.localised_name = {"", {"entity-name." .. t_name}, " (1/7)"}
-      new_turret.name = t_name .. "-tr1/7"
+      new_turret.name = t_name .. "-tr1d7"
       new_turret.attack_parameters.turn_range = 1/7
       table.insert(new_turrets, new_turret)
     end
@@ -50,10 +53,10 @@ for _, tech in pairs(data.raw.technology) do
     end
     for _, bonus in pairs(t_bonus) do
       local b = table.deepcopy(bonus)
-      b.turret_id = bonus.turret_id .. "-tr1/3"
+      b.turret_id = bonus.turret_id .. "-tr1d3"
       table.insert(tech.effects, b)
       b = table.deepcopy(bonus)
-      b.turret_id = bonus.turret_id .. "-tr1/7"
+      b.turret_id = bonus.turret_id .. "-tr1d7"
       table.insert(tech.effects, b)
     end
   end

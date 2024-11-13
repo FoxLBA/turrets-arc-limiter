@@ -1,11 +1,11 @@
 {
   "name":"turrets-arc-limiter",
   "author":"FoxLBA",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "title":"Turrets arc limiter",
   "homepage":"",
   "description":"Allows you to limit the arc of turrets with a full-range arc.",
   "dependencies": ["base"],
-  "factorio_version": "1.1",
+  "factorio_version": "2.0",
   "package": {"ignore": ["README.md"]}
 }
