@@ -60,6 +60,7 @@ local function replace_turret(entity, new_name, new_direction)
     position = entity.position,
     force = entity.force,
     direction = new_direction or entity.direction,
+    quality = entity.quality,
     fast_replace = true,
     raise_built = true,
     spill = false,
