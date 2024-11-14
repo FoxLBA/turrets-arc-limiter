@@ -1,6 +1,7 @@
 local function find_controled_turret()
   local turret_inddex = {}
   local turret_defauld_index = {}
+  local turret_odd_sized = {}
   for _, turret in pairs(prototypes.get_entity_filtered{
       {filter = "type", type = {"ammo-turret", "electric-turret"}}
     }) do
@@ -17,10 +18,17 @@ local function find_controled_turret()
         turret_defauld_index[t2.name] = t_name
         turret_defauld_index[t3.name] = t_name
       end
+      local cbox = prototypes.entity[t_name].collision_box
+      if (cbox.right_bottom.x - cbox.left_top.x) > 2 then
+        --turret_odd_sized[t_name] = true
+        turret_odd_sized[t2.name] = true
+        turret_odd_sized[t3.name] = true
+      end
     end
   end
   storage.turret_inddex = turret_inddex
   storage.turret_defauld_index = turret_defauld_index
+  storage.turret_odd_sized = turret_odd_sized
 end
 
 local function on_configuration_changed(event)
@@ -102,7 +110,8 @@ local function rotate_turret(event, reverse)
   local selected = player.selected
   if selected and selected.valid and storage.turret_defauld_index[selected.name] then
     local d = 2
-    if reverse then d = 14 end
+    if storage.turret_odd_sized[selected.name] then d = d * 2 end
+    if reverse then d = 16 - d end
     d = (selected.direction + d) % 16
     replace_turret(selected, selected.name, d)
   end

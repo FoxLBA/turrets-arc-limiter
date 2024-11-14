@@ -22,8 +22,10 @@ for _, type in pairs({"ammo-turret", "electric-turret"}) do
       turret.fast_replaceable_group = fr_group
       if not is_have_8_way_flag(turret.flags) then
         table.insert(turret.flags, "building-direction-8-way")
-        local connector = turret.circuit_connector[1]
-        for i = 1, 7 do table.insert(turret.circuit_connector, connector) end
+        if #turret.circuit_connector == 1 then
+          local connector = turret.circuit_connector[1]
+          for i = 1, 7 do table.insert(turret.circuit_connector, connector) end
+        end
       end
       turret.turret_base_has_direction = true
       --turret.allow_turning_when_starting_attack = true
