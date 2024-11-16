@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.3
+Date: ????
+  Changes:
+    - Mod can interact with placed ghost turrets.
+  Bugfixes:
+    - Fixed crash when a turret from another mod does not have connection point for logic.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.2
 Date: 2024-11-14
   Bugfixes:

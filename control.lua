@@ -48,14 +48,23 @@ local function on_configuration_changed(event)
   end
 end
 
+local function get_entity_name(entity)
+  local e_name = entity.name
+  if e_name == "entity-ghost" then
+    return entity.ghost_name
+  end
+  return e_name
+end
+
 local function replace_turret(entity, new_name, new_direction)
+  local is_ghost = (entity.name == "entity-ghost")
   local dd = entity.damage_dealt
   local k = entity.kills
   local last = entity.last_user
   local energy = entity.energy
   local health = entity.health
 
-  local new_entity = entity.surface.create_entity({
+  local params = {
     name = new_name,
     position = entity.position,
     force = entity.force,
@@ -65,42 +74,50 @@ local function replace_turret(entity, new_name, new_direction)
     raise_built = true,
     spill = false,
     create_build_effect_smoke = false,
-  })
+  }
+  if is_ghost then
+    params.name = "entity-ghost"
+    params.inner_name = new_name
+    params.tags = entity.tags
+  end
+
+  local new_entity = entity.surface.create_entity(params)
   if new_entity then
     new_entity.damage_dealt = dd
     new_entity.kills = k
     new_entity.last_user = last
-    new_entity.health = health
-    if energy then new_entity.energy = energy end
+    if not is_ghost then
+      new_entity.health = health
+      if energy then new_entity.energy = energy end
+    end
   end
   return new_entity
 end
 
 local function change_turret_turn_range(entity, change_type, player)
+  local e_name = get_entity_name(entity)
   local new_name
   if change_type == "next" then
-    new_name =  storage.turret_inddex[entity.name]
+    new_name =  storage.turret_inddex[e_name]
   else
-    new_name =  storage.turret_defauld_index[entity.name]
+    new_name =  storage.turret_defauld_index[e_name]
   end
   if not new_name then return end
   local new_entity = replace_turret(entity, new_name)
-  if new_entity then
-    if player then
-      player.play_sound{path = "utility/wire_connect_pole"}
-    end
+  if new_entity and player then
+    player.play_sound{path = "utility/wire_connect_pole"}
   end
 end
 
 script.on_init(find_controled_turret)
-script.on_configuration_changed(on_configuration_changed)
+script.on_configuration_changed(find_controled_turret)
 
 script.on_event("change-turret-turn-range", function(e)
 ---@diagnostic disable-next-line: undefined-field
   local player = game.get_player(e.player_index)
   if not player then return end
   local selected = player.selected
-  if selected and selected.valid and storage.turret_inddex[selected.name] then
+  if selected and selected.valid and storage.turret_inddex[get_entity_name(selected)] then
     change_turret_turn_range(selected, "next", player)
   end
 end)
@@ -109,12 +126,15 @@ local function rotate_turret(event, reverse)
   local player = game.players[event.player_index]
   if not player then return end
   local selected = player.selected
-  if selected and selected.valid and storage.turret_defauld_index[selected.name] then
-    local d = 2
-    if storage.turret_odd_sized[selected.name] then d = d * 2 end
-    if reverse then d = 16 - d end
-    d = (selected.direction + d) % 16
-    replace_turret(selected, selected.name, d)
+  if selected and selected.valid then
+    local e_name = get_entity_name(selected)
+    if storage.turret_defauld_index[e_name] then
+      local d = 2
+      if storage.turret_odd_sized[e_name] then d = d * 2 end
+      if reverse then d = 16 - d end
+      d = (selected.direction + d) % 16
+      replace_turret(selected, e_name, d)
+    end
   end
 end
 
