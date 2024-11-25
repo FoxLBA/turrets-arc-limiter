@@ -160,11 +160,6 @@ script.on_event("change-turret-turn-range", function(e)
   local index = e.player_index
   local player = game.get_player(index)
   if not player then return end
-  local selected = player.selected
-  if selected and selected.valid and storage.turret_inddex[get_entity_name(selected)] then
-    change_turret_turn_range(selected, "next", player)
-    return
-  end
   local cursor_ghost = player.cursor_ghost
   if cursor_ghost and storage.turret_inddex[cursor_ghost.name.name] then
     cursor_ghost.name = storage.turret_inddex[player.cursor_ghost.name.name]
@@ -191,6 +186,11 @@ script.on_event("change-turret-turn-range", function(e)
       })
       player.play_sound{path = sound_p}
     end
+    return
+  end
+  local selected = player.selected
+  if selected and selected.valid and storage.turret_inddex[get_entity_name(selected)] then
+    change_turret_turn_range(selected, "next", player)
     return
   end
 end)
