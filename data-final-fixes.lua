@@ -28,7 +28,6 @@ for _, type in pairs({"ammo-turret", "electric-turret"}) do
         end
       end
       turret.turret_base_has_direction = true
-      --turret.allow_turning_when_starting_attack = true
       turret.localised_description = {"", {"?", turret.localised_description or {"entity-description." .. t_name}, ""}, {"other.additional-turret-description"}}
       local new_turret = table.deepcopy(turret)
       new_turret.placeable_by = {item = t_name, count = 1}
@@ -40,6 +39,15 @@ for _, type in pairs({"ammo-turret", "electric-turret"}) do
       new_turret.name = t_name .. "-tr1d7"
       new_turret.attack_parameters.turn_range = 1/7
       table.insert(new_turrets, new_turret)
+
+      local t_item = table.deepcopy(data.raw.item[t_name])
+      t_item.hidden = true
+      t_item.name = t_name .. "-tr1d3"
+      t_item.place_result = t_name .. "-tr1d3"
+      table.insert(new_turrets, table.deepcopy(t_item))
+      t_item.name = t_name .. "-tr1d7"
+      t_item.place_result = t_name .. "-tr1d7"
+      table.insert(new_turrets, t_item)
     end
   end
 end

@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.1.4
+Date: 2024-11-25
+  Features:
+    - Now the turret mode can be switched by holding a turret object or a ghost in your hand.
+    - When building a turret on top of a modified ghost turret, the turret mode and direction are set like a ghost.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.3
 Date: 2024-11-16
   Changes:
