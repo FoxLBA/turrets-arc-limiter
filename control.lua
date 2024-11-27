@@ -117,12 +117,12 @@ local function on_init()
         turret_inddex[t3.name] = t_name
         turret_defauld_index[t2.name] = t_name
         turret_defauld_index[t3.name] = t_name
-      end
-      local cbox = prototypes.entity[t_name].collision_box
-      if (cbox.right_bottom.x - cbox.left_top.x) > 2 then
-        turret_odd_sized[t_name] = true
-        turret_odd_sized[t2.name] = true
-        turret_odd_sized[t3.name] = true
+        local cbox = prototypes.entity[t_name].collision_box
+        if (cbox.right_bottom.x - cbox.left_top.x) > 2 then
+          turret_odd_sized[t_name] = true
+          turret_odd_sized[t2.name] = true
+          turret_odd_sized[t3.name] = true
+        end
       end
     end
   end
